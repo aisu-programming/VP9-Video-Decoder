@@ -1,3 +1,21 @@
+# VP9-Video-Decoder
+
+## Download
+`git clone https://github.com/aisu-programming/VP9-Video-Decoder.git`
+
+## Installation
+`npm i`
+
+Though I have checked but may have dependency issues.
+
+## Run
+`npm start`
+
+## Usage
+The main part of codes are in [src/App.tsx (7:58)](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L7-L58).
+
+Simply edit codes in [line 60:66](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L60-L66) to change the input.
+
 <!-- # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
