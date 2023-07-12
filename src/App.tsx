@@ -58,8 +58,8 @@ function decodeJsonData(jsonData: any) {
 }
 
 const jsonDataList = require('./sample_data/0_decoded_video_momo.json');
-decodeJsonData(jsonDataList[1]);
-decodeJsonData(jsonDataList[6]);
+decodeJsonData(jsonDataList[1]);  // KEY   frame
+decodeJsonData(jsonDataList[6]);  // DELTA frame (must be same in shape of previous KEY frame)
 
 // jsonDataList.forEach((jsonData: any) => {
 //   decodeJsonData(jsonData);
