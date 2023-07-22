@@ -6,9 +6,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
-COUNTER = 1
-SAVE_FOLDER_DICT = {}
+SAVE_FOLDER_LIST = []
 
 
 def save_image_from_base64(base64_image, filepath):
@@ -25,24 +23,23 @@ def save_image_from_base64(base64_image, filepath):
 @app.route('/upload', methods=['POST'])
 def upload_image():
 
-    global COUNTER
-    print(COUNTER)
-    COUNTER += 1
-
     data = request.get_json()
-    base64_image = data['image']
+    base64_image = data["image"]
+    car          = data["car"]
+    camera       = data["camera"]
+    utime        = data["utime"]
     
-    if data['label'] not in SAVE_FOLDER_DICT.keys():
-        SAVE_FOLDER_DICT[data['label']] = 1
-        os.makedirs(f"decoded_images/{data['label']}", exist_ok=True)
+    save_dir = f"{car}/{camera}"
+    if save_dir not in SAVE_FOLDER_LIST:
+        os.makedirs(f"decoded_images/{save_dir}", exist_ok=True)
+        SAVE_FOLDER_LIST.append(save_dir)
 
     # 產生唯一的檔案名稱，例如 image_1.jpg、image_2.jpg，以時間戳記為名稱
-    filename = f"image_{SAVE_FOLDER_DICT[data['label']]:05}.jpg"
-    SAVE_FOLDER_DICT[data['label']] += 1
-    filepath = f"decoded_images/{data['label']}/{filename}"
+    filename = str(utime) + ".jpg"
+    save_path = f"decoded_images/{save_dir}/{filename}"
 
     # 儲存影像檔案到本地硬碟中
-    save_image_from_base64(base64_image, filepath)
+    save_image_from_base64(base64_image, save_path)
 
     return jsonify({'message': 'File uploaded successfully'})
 
