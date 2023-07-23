@@ -12,9 +12,9 @@ Though I have checked but may have dependency issues.
 `npm start`
 
 ## Usage
-The main part of codes are in [src/App.tsx (7:58)](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L7-L58).
+The main part of codes are in [src/App.tsx (7:126)](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L7-L58).
 
-Simply edit codes in [line 60:66](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L60-L66) to change the input.
+Simply edit codes in [line 128:140](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L60-L66) to change the input json data filepaths and the utime limitation.
 
 <!-- # Getting Started with Create React App
 
