@@ -8,45 +8,50 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function createVideoDecoder(car: string, camera: string, utime_start: number, utime_end: number): VideoDecoder {
+function createVideoDecoder(car: string, camera: string, targetsJson: Array<any>): VideoDecoder {
     return new VideoDecoder({
         output: (videoFrame: VideoFrame) => {
 
             // Filter and send only the images we want to the Back-End
             const utime = videoFrame.timestamp;
-            if (utime_start <= utime && utime <= utime_end) {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+            targetsJson.forEach((targetDetail) => {
+                const utimeStart = targetDetail["utime_start"];
+                const utimeEnd = targetDetail["utime_end"];
+                const carList = targetDetail["cars"];
+                if (utimeStart <= utime && utime <= utimeEnd && car in carList) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
 
-                if (ctx) {
-                    canvas.width = videoFrame.displayWidth;
-                    canvas.height = videoFrame.displayHeight;
+                    if (ctx) {
+                        canvas.width = videoFrame.displayWidth;
+                        canvas.height = videoFrame.displayHeight;
 
-                    // 將 VideoFrame 的像素數據繪製到 canvas 上
-                    ctx.drawImage(videoFrame, 0, 0);
+                        // 將 VideoFrame 的像素數據繪製到 canvas 上
+                        ctx.drawImage(videoFrame, 0, 0);
 
-                    // 使用 Fetch API 將 base64Image 傳送到後端伺服器
-                    fetch("http://127.0.0.1:5000/upload", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            image: canvas.toDataURL("image/jpeg"),
-                            car: car,
-                            camera: camera,
-                            utime: utime,
-                        }),
-                    })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            // console.log(data.message);
+                        // 使用 Fetch API 將 base64Image 傳送到後端伺服器
+                        fetch("http://127.0.0.1:5000/upload", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                image: canvas.toDataURL("image/jpeg"),
+                                car: car,
+                                camera: camera,
+                                utime: utime,
+                            }),
                         })
-                        .catch((error) => {
-                            console.warn("圖片上傳失敗：", error);
-                        });
+                            .then((response) => response.json())
+                            .then((data) => {
+                                // console.log(data.message);
+                            })
+                            .catch((error) => {
+                                console.warn("圖片上傳失敗：", error);
+                            });
+                    }
                 }
-            }
+            })
             videoFrame.close();
         },
         error: (error: Error) => {
@@ -77,69 +82,165 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t) {
     }
 }
 
-async function main(jsonDataPathList: Array<any>, utime_start: number, utime_end: number) {
+async function loadJSON(filepath: string) {
+    try {
+      const response = await fetch(filepath);
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
+      }
+      const jsonData = await response.json();
+      return jsonData;
+    } catch (error) {
+      console.error('Error loading JSON:', error);
+      throw error;
+    }
+  }
+  
+
+async function main(metaJson: Array<any>, targetsJson: Array<any>) {
     const cameraToVideoDecoder: Record<string, any> = {};
     let post_counter = 0;
 
-    for (let jsonDataPathIndex = 0; jsonDataPathIndex < jsonDataPathList.length; jsonDataPathIndex++) {
-        let jsonDataPath = jsonDataPathList[jsonDataPathIndex];
-        let jsonDataList: Array<any> = require(`${jsonDataPath}`);
+    for (let metaIndex = 0; metaIndex < metaJson.length; metaIndex++) {
+        const metaItem = metaJson[metaIndex];
+        const car = metaItem["car"];
+        const filepath = metaItem["filepath"];
+        const dataList: Array<any> = await loadJSON(filepath);
+        // const dataList: Array<any> = require(`${filepath}`);
 
-        for (let jsonDataIndex = 0; jsonDataIndex < jsonDataList.length; jsonDataIndex++) {
-            const jsonData = jsonDataList[jsonDataIndex];
+        for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
+            const data = dataList[dataIndex];
 
-            if (jsonData === undefined) { console.log(jsonData); }
+            if (data === undefined) { console.log(data); }
 
-            // Ignore data can't be decoded
-            if (jsonData.camera != "EG") {
+            // // Ignore data can't be decoded
+            // if (data.camera != "EG") {
+            if (true) {
+
+                const VideoDecoderId = car + data.camera;
 
                 // Create new VideoDecoder for new car-camera
-                if (!(jsonData.camera in cameraToVideoDecoder)) {
-                    var newVideoDecoder = createVideoDecoder("metheven", jsonData.camera, utime_start, utime_end);
+                if (!(VideoDecoderId in cameraToVideoDecoder)) {
+                    var newVideoDecoder = createVideoDecoder(car, data.camera, targetsJson);
                     newVideoDecoder = configureDecoder(newVideoDecoder, {
                         codec: "vp09.00.10.08",
                         optimizeForLatency: true,
                         hardwareAcceleration: "prefer-software",
                     });
-                    cameraToVideoDecoder[jsonData.camera] = newVideoDecoder;
+                    cameraToVideoDecoder[VideoDecoderId] = newVideoDecoder;
                 }
 
-                const decoder: VideoDecoder = cameraToVideoDecoder[jsonData.camera];
+                const decoder: VideoDecoder = cameraToVideoDecoder[VideoDecoderId];
                 const image: May.image_t = new May.image_t();
-                Object.assign(image, jsonData);
+                Object.assign(image, data);
                 decodeImage(decoder, image);
 
                 const utime = Number(image.utime);
-                if (utime_start <= utime && utime <= utime_end) {
-                    post_counter++;
-                    if (post_counter >= 50) {
-                        // On my computer: approximately cost 1 seconds for Back-End to process 50 pakages
-                        console.log(jsonDataPathIndex, jsonDataPath, jsonDataIndex, "Sleep for 1 seconds!");
-                        await sleep(1000);
-                        post_counter = 0;
+                targetsJson.forEach(async (targetDetail) => {
+                    const utimeStart = targetDetail["utime_start"];
+                    const utimeEnd = targetDetail["utime_end"];
+                    const carList = targetDetail["cars"];
+                    if (utimeStart <= utime && utime <= utimeEnd && car in carList) {
+                        post_counter++;
+                        if (post_counter >= 50) {
+                            // On my computer: approximately cost 1 seconds for Back-End to process 50 pakages
+                            console.log(metaIndex, filepath, dataIndex, "Sleep for 1 seconds!");
+                            await sleep(1000);
+                            post_counter = 0;
+                        }
                     }
-                }
+                })
             }
         }
-        console.log(jsonDataPathIndex, jsonDataPath, jsonDataList.length, "Finished!");
+        console.log(metaIndex, filepath, dataList.length, "Finished!");
     }
 }
 
-const jsonDataPathList = [
-    "./sample_data/metheven/0_decoded_video.json",
-    "./sample_data/metheven/10000_decoded_video.json",
-    "./sample_data/metheven/20000_decoded_video.json",
-    "./sample_data/metheven/30000_decoded_video.json",
-    "./sample_data/metheven/40000_decoded_video.json",
-    "./sample_data/metheven/50000_decoded_video.json",
-    "./sample_data/metheven/60000_decoded_video.json",
-    "./sample_data/metheven/70000_decoded_video.json",
-    "./sample_data/metheven/80000_decoded_video.json",
-]
-const utime_start = 1689704191610548;
-const utime_end = 1689704201809922;
+const metaJson: Array<any> = [
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/0_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/10000_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/20000_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/30000_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/40000_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/50000_decoded_video.json"
+    },
+    {
+        "car": "makeba",
+        "filepath": "./sample_data/_2023_07_26/makeba/60000_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/0_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/10000_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/20000_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/30000_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/40000_decoded_video.json"
+    },
+    {
+        "car": "marinara",
+        "filepath": "./sample_data/_2023_07_26/marinara/50000_decoded_video.json"
+    },
+    {
+        "car": "metheven",
+        "filepath": "./sample_data/_2023_07_26/metheven/0_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/0_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/10000_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/20000_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/30000_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/40000_decoded_video.json"
+    },
+    {
+        "car": "momo",
+        "filepath": "./sample_data/_2023_07_26/momo/50000_decoded_video.json"
+    }
+];
+const targetsJson: Array<any> = require("./sample_data/_2023_07_26/_2023_07_26_groups.json");
 console.log("Start decoding...");
-main(jsonDataPathList, utime_start, utime_end);
+main(metaJson, targetsJson);
 
 
 
