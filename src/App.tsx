@@ -82,31 +82,15 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t) {
     }
 }
 
-async function loadJSON(filepath: string) {
-    try {
-      const response = await fetch(filepath);
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
-      }
-      const jsonData = await response.json();
-      return jsonData;
-    } catch (error) {
-      console.error('Error loading JSON:', error);
-      throw error;
-    }
-  }
-  
-
-async function main(metaJson: Array<any>, targetsJson: Array<any>) {
+async function main(targetsJson: Array<any>) {
     const cameraToVideoDecoder: Record<string, any> = {};
     let post_counter = 0;
 
-    for (let metaIndex = 0; metaIndex < metaJson.length; metaIndex++) {
-        const metaItem = metaJson[metaIndex];
-        const car = metaItem["car"];
-        const filepath = metaItem["filepath"];
-        const dataList: Array<any> = await loadJSON(filepath);
-        // const dataList: Array<any> = require(`${filepath}`);
+    targetsJson.forEach(async (target) => {
+        const utimeStart = target["utime_start"];
+        const utimeEnd = target["utime_end"];
+        const cars = target["cars"];
+    })
 
         for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
             const data = dataList[dataIndex];
@@ -156,91 +140,9 @@ async function main(metaJson: Array<any>, targetsJson: Array<any>) {
     }
 }
 
-const metaJson: Array<any> = [
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/0_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/10000_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/20000_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/30000_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/40000_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/50000_decoded_video.json"
-    },
-    {
-        "car": "makeba",
-        "filepath": "./sample_data/_2023_07_26/makeba/60000_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/0_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/10000_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/20000_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/30000_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/40000_decoded_video.json"
-    },
-    {
-        "car": "marinara",
-        "filepath": "./sample_data/_2023_07_26/marinara/50000_decoded_video.json"
-    },
-    {
-        "car": "metheven",
-        "filepath": "./sample_data/_2023_07_26/metheven/0_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/0_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/10000_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/20000_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/30000_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/40000_decoded_video.json"
-    },
-    {
-        "car": "momo",
-        "filepath": "./sample_data/_2023_07_26/momo/50000_decoded_video.json"
-    }
-];
 const targetsJson: Array<any> = require("./sample_data/_2023_07_26/_2023_07_26_groups.json");
 console.log("Start decoding...");
-main(metaJson, targetsJson);
+main(targetsJson);
 
 
 
