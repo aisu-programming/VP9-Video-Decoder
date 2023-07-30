@@ -23,7 +23,7 @@ def test():
 
 
 def main():
-    for root, _, files in os.walk("src/sample_data/_2023_07_26"):
+    for root, _, files in os.walk("src/sample_data"):
         root = root.replace('\\', '/')
         for file in tqdm(files, desc=root):
             if "_decoded_video.json" in file:
