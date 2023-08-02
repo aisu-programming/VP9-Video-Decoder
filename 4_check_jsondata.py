@@ -1,5 +1,6 @@
 import os
 import json
+from tqdm import tqdm
 
 def check(car, item, target_list):
     utime = int(item["utime"])
@@ -26,7 +27,7 @@ def process_json_file(car, json_filepath, target_list):
 
 def main():
 
-    path = "2023_07_26"
+    path = "2023_07_31"
 
     target_file = f"src/sample_data/_{path}/_{path}_groups.json"
     with open(target_file, "r") as file:
@@ -36,7 +37,7 @@ def main():
     static = {}
     root_directory = f"src/sample_data/_{path}"
     for root, _, files in os.walk(root_directory):
-        for file in files:
+        for file in tqdm(files, desc=root):
             if file.endswith("_decoded_video.json"):
                 car = root.split('\\')[-1]
                 json_filepath = os.path.join(root, file)

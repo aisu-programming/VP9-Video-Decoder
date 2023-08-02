@@ -1,7 +1,7 @@
 import json
-from src.sample_data._2023_07_28._2023_07_28_groups import utime_interval_list
+from src.sample_data._2023_07_31._2023_07_31_groups import utime_interval_list
 
-filename = "_2023_07_28"
+filename = "_2023_07_31"
 
 # print(utime_interval_list)
 json_list = []

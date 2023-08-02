@@ -7,13 +7,22 @@ from tqdm import tqdm
 def repair_jsonfile(filepath):
     with open(filepath, 'r') as file:
         content = file.read()
+
+        if content[-1:] == ',':
+            content = content[:-1]
+        elif content[-2:] == ',\n':
+            content = content[:-2]
         if '[' not in content[:5]:
             content = '[' + content + ']'
+
         content = "},\n{".join(content.split("}{"))
+
     with open(filepath, 'w') as file:
         file.write(content)
+
     with open(filepath, 'r') as file:
         json_data = json.load(file)
+
     with open(filepath, 'w') as file:
         json.dump(json_data, file, indent=2)
 
@@ -23,9 +32,11 @@ def test():
 
 
 def main():
-    for root, _, files in os.walk("src/sample_data"):
+    for root, _, files in os.walk("src/sample_data/_2023_07_31"):
         root = root.replace('\\', '/')
-        for file in tqdm(files, desc=root):
+        pbar = tqdm(files)
+        for file in pbar:
+            pbar.set_description(f"{root}/{file}")
             if "_decoded_video.json" in file:
                 filepath = f"{root}/{file}"
                 repair_jsonfile(filepath)
