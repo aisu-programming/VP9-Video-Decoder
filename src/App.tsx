@@ -40,7 +40,7 @@ function postSuccessfullyDecodedImage(videoFrame: VideoFrame, date: string, came
     }
 }
 
-function postDecodeErrorImage(image: May.image_t, date:string, camera: string, car: string) {
+function postDecodeErrorImage(image: May.image_t, date: string, camera: string, car: string) {
     fetch("http://127.0.0.1:5000/upload/failed", {
         method: "POST",
         headers: {
@@ -84,19 +84,16 @@ async function fetchData(url: string) {
     }
 }
 
-function createVideoDecoder(date: string, camera: string, car: string, targetsJson: Array<any>): VideoDecoder {
+function createVideoDecoder(date: string, camera: string, car: string, target: Record<string, any>): VideoDecoder {
     return new VideoDecoder({
         output: (videoFrame: VideoFrame) => {
             // Filter and send only the images we want to the Back-End
             const utime = videoFrame.timestamp;
-            targetsJson.forEach((target) => {
-                const utimeStart = Number(target["utime_start"]);
-                const utimeEnd = Number(target["utime_end"]);
-                const carList: Array<string> = target["cars"];
-                if (utimeStart <= utime && utime <= utimeEnd && carList.includes(car)) {
-                    postSuccessfullyDecodedImage(videoFrame, date, camera, car, utime);
-                }
-            })
+            const utimeStart = Number(target["utime_start"]);
+            const utimeEnd = Number(target["utime_end"]);
+            if (utimeStart <= utime && utime <= utimeEnd) {
+                postSuccessfullyDecodedImage(videoFrame, date, camera, car, utime);
+            }
             videoFrame.close();
         },
         error: (error: Error) => {
@@ -110,7 +107,7 @@ function configureDecoder(decoder: VideoDecoder, config: VideoDecoderConfig): Vi
     return decoder;
 }
 
-function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, camera: string, car: string, targetsJson: Array<Record<string, any>>) {
+function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, camera: string, car: string, target: Record<string, any>) {
     if (image.data !== undefined) {
         const uint8array = Uint8Array.from(atob(image.data.toString()), c => c.charCodeAt(0));
         const encodedVideoChunk = new EncodedVideoChunk({
@@ -124,14 +121,11 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, ca
         } catch (error) {
             if (error instanceof DOMException) {
                 const utime = Number(image.utime);
-                targetsJson.forEach((target) => {
-                    const utimeStart = Number(target["utime_start"]);
-                    const utimeEnd = Number(target["utime_end"]);
-                    const carList: Array<string> = target["cars"];
-                    if (utimeStart <= utime && utime <= utimeEnd && carList.includes(car)) {
-                        postDecodeErrorImage(image, date, camera, car);
-                    }
-                })
+                const utimeStart = Number(target["utime_start"]);
+                const utimeEnd = Number(target["utime_end"]);
+                if (utimeStart <= utime && utime <= utimeEnd) {
+                    postDecodeErrorImage(image, date, camera, car);
+                }
             }
             else { console.error("Unknown error: ", error, decoder, image); }
         }
@@ -144,45 +138,33 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, ca
 async function main(date: string, targetsJson: Array<Record<string, any>>) {
     console.log("Start decoding...");
 
-    const carSet: Set<string> = new Set();
-    targetsJson.forEach((target) => {
-        const cars: Array<string> = target["cars"];
-        cars.forEach((car) => { carSet.add(car); });
-    })
+    for (let targetIndex = 0; targetIndex < targetsJson.length; targetIndex++) {
+        const target = targetsJson[targetIndex];
+        console.log(`Decoding targetsJson[${targetIndex}]: `, target);
 
-    const carData: Record<string, Array<any>> = {};
-    const carList = Array.from(carSet);
-    for (const car of carList) {
-        // 定義要傳遞的參數
-        const params = new URLSearchParams();
-        params.append("date", date);
-        params.append("car", car);
+        for (const car of target["cars"]) {
+            // 定義要傳遞的參數
+            const params = new URLSearchParams();
+            params.append("date", date);
+            params.append("car", car);
+            params.append("utimeStart", target["utime_start"]);
+            params.append("utimeEnd", target["utime_end"]);
 
-        // 組合完整的 URL，包含參數
-        const url = "http://127.0.0.1:5000/data?" + params.toString();
-        console.log("GET", url);
-        const data = await fetchData(url);
-        carData[car] = data.data;
-    }
+            // 組合完整的 URL，包含參數
+            const url = "http://127.0.0.1:5000/data?" + params.toString();
+            console.log("GET", url);
+            const dataList = (await fetchData(url)).data;
 
-    let postCounter = 0;
-    const VideoDecoders: Record<string, any> = {};
-    for (const car of carList) {
-        const dataList: Array<any> = carData[car];
-        console.log(car, dataList.length, "Start decoding...");
-
-        for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
-            const data = dataList[dataIndex];
-            if (data === undefined) { console.error("Error: data is undefined: ", data); }
-
-            // // Ignore data can't be decoded
-            // if (data.camera != "EG") {
-            if (true) {
-                const VideoDecoderId = date + data.camera + car;
+            const VideoDecoders: Record<string, any> = {};
+            let postCounter = 0;
+            for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
+                const data = dataList[dataIndex];
+                if (data === undefined) { console.error("Error: data is undefined: ", data); }
+                const VideoDecoderId = data.camera;
 
                 // Create new VideoDecoder for new car-camera
                 if (!(VideoDecoderId in VideoDecoders)) {
-                    var newVideoDecoder = createVideoDecoder(date, data.camera, car, targetsJson);
+                    var newVideoDecoder = createVideoDecoder(date, data.camera, car, target);
                     newVideoDecoder = configureDecoder(newVideoDecoder, {
                         codec: "vp09.00.10.08",
                         optimizeForLatency: true,
@@ -195,32 +177,27 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
                 const image: May.image_t = new May.image_t();
                 Object.assign(image, data);
                 const utime = Number(image.utime);
-                decodeImage(decoder, image, date, data.camera, car, targetsJson);
+                decodeImage(decoder, image, date, data.camera, car, target);
 
-                for (let targetIndex = 0; targetIndex < targetsJson.length; targetIndex++) {
-                    const target = targetsJson[targetIndex];
-                    const utimeStart = Number(target["utime_start"]);
-                    const utimeEnd = Number(target["utime_end"]);
-                    const carList: Array<string> = target["cars"];
-                    if (utimeStart <= utime && utime <= utimeEnd && carList.includes(car)) {
-                        postCounter++;
-                        // On my computer: approximately cost 1 seconds for Back-End to process 50 pakages
-                        if (postCounter >= 50) {
-                            // console.log(car, dataIndex, "Sleep for 1 seconds!");
-                            await sleep(1000);
-                            postCounter = 0;
-                        }
+                const utimeStart = Number(target["utime_start"]);
+                const utimeEnd = Number(target["utime_end"]);
+                if (utimeStart <= utime && utime <= utimeEnd) {
+                    postCounter++;
+                    // On my computer: approximately cost 1 seconds for Back-End to process 50 pakages
+                    if (postCounter >= 50) {
+                        // console.log(car, dataIndex, "Sleep for 1 seconds!");
+                        await sleep(1000);
+                        postCounter = 0;
                     }
                 }
             }
         }
-        console.log(car, dataList.length, "Finished decoding!");
+        console.log(`Finished decoding targetsJson[${targetIndex}].`);
     }
-
     console.log("All finished!");
 }
 
-const date = "2023_07_26"
+const date = "2023_07_31"
 const targetsJson: Array<any> = require(`./sample_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
