@@ -29,11 +29,12 @@ def upload_successfully_decoded_image():
     data = request.get_json()
     base64_image = data["image"]
     date         = data["date"]
+    scene        = data["scene"]
     camera       = data["camera"]
     car          = data["car"]
     utime        = data["utime"]
     
-    save_dir = f"{date}/{camera}/{car}"
+    save_dir = f"{date}/{scene}/{camera}/{car}"
     if save_dir not in SAVE_FOLDER_LIST:
         os.makedirs(f"decoded_images/{save_dir}", exist_ok=True)
         SAVE_FOLDER_LIST.append(save_dir)
@@ -47,13 +48,14 @@ def upload_successfully_decoded_image():
 def create_black_image():
     data = request.get_json()
     date   = data["date"]
+    scene  = data["scene"]
     camera = data["camera"]
     car    = data["car"]
     utime  = data["utime"]
     width  = data["width"]
     height = data["height"]
     
-    save_dir = f"{date}/{camera}/{car}"
+    save_dir = f"{date}/{scene}/{camera}/{car}"
     if save_dir not in SAVE_FOLDER_LIST:
         os.makedirs(f"decoded_images/{save_dir}", exist_ok=True)
         SAVE_FOLDER_LIST.append(save_dir)
@@ -63,30 +65,7 @@ def create_black_image():
     return jsonify({"message": "File uploaded successfully"})
 
 
-# @app.route("/data/info", methods=["GET"])
-# def get_data_info():
-#     date = request.args.get("date")
-#     car  = request.args.get("car")
-#     if car is not None:
-#         data = { "data": [1, 2, 3, 4, 5] }
-#     else:
-#         data = { "error": "Parameter loss: \"car\"。" }
-#     return jsonify(data)
-
-
-# @app.route("/data/item", methods=["GET"])
-# def get_data_item():
-#     date = request.args.get("date")
-#     car  = request.args.get("car")
-#     if car is not None:
-#         data = { "data": [1, 2, 3, 4, 5] }
-#     else:
-#         data = { "error": "Parameter loss: \"car\"。" }
-#     return jsonify(data)
-
-
 CACHE_DATA = {}
-
 @app.route("/data", methods=["GET"])
 def get_data():
     date        = request.args.get("date")
@@ -100,17 +79,23 @@ def get_data():
         # if f"{car}" not in CACHE_DATA.keys():
         directory = f"src/encoded_data/_{date}/{car}"
         json_files = list(os.listdir(directory))
-        
+        json_files = sorted(json_files, key=lambda f: int(f.split('_')[0]))
         pbar = tqdm(json_files, desc="Loading data")
         for json_file in pbar:
             pbar.set_description(f'Loading data from "{json_file}"')
             with open(f"{directory}/{json_file}", 'r') as json_file:
                 data_list = json.load(json_file)
+
+                # Clean data: eliminate EG
                 data_list = list(filter(lambda d: d["camera"] != "EG", data_list))
-                response_data += list(filter(
+
+                response_data_tmp = list(filter(
                     lambda d: utime_start <= d["utime"] <= utime_end, data_list))
-                reference_data += list(filter(
+                reference_data_tmp = list(filter(
                     lambda d: d["utime"] < utime_start, data_list))
+                if len(response_data_tmp) == 0 and len(reference_data_tmp) == 0: break
+                response_data  += response_data_tmp
+                reference_data += reference_data_tmp
         
         if len(response_data) == 0:
             print("No response_data.")

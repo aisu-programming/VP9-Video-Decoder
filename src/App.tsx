@@ -8,7 +8,7 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function postSuccessfullyDecodedImage(videoFrame: VideoFrame, date: string, camera: string, car: string, utime: number) {
+function postSuccessfullyDecodedImage(videoFrame: VideoFrame, date: string, scene: string, camera: string, car: string, utime: number) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -25,6 +25,7 @@ function postSuccessfullyDecodedImage(videoFrame: VideoFrame, date: string, came
             body: JSON.stringify({
                 image: canvas.toDataURL("image/jpeg"),
                 date: date,
+                scene: scene,
                 camera: camera,
                 car: car,
                 utime: utime,
@@ -40,7 +41,7 @@ function postSuccessfullyDecodedImage(videoFrame: VideoFrame, date: string, came
     }
 }
 
-function postDecodeErrorImage(image: May.image_t, date: string, camera: string, car: string) {
+function postDecodeErrorImage(image: May.image_t, date: string, scene: string, camera: string, car: string) {
     fetch("http://127.0.0.1:5000/upload/failed", {
         method: "POST",
         headers: {
@@ -48,6 +49,7 @@ function postDecodeErrorImage(image: May.image_t, date: string, camera: string, 
         },
         body: JSON.stringify({
             date: date,
+            scene: scene,
             camera: camera,
             car: car,
             utime: image.utime,
@@ -92,7 +94,8 @@ function createVideoDecoder(date: string, camera: string, car: string, target: R
             const utimeStart = Number(target["utime_start"]);
             const utimeEnd = Number(target["utime_end"]);
             if (utimeStart <= utime && utime <= utimeEnd) {
-                postSuccessfullyDecodedImage(videoFrame, date, camera, car, utime);
+                const scene: string = `${utimeStart}_${utimeEnd}`
+                postSuccessfullyDecodedImage(videoFrame, date, scene, camera, car, utime);
             }
             videoFrame.close();
         },
@@ -124,7 +127,8 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, ca
                 const utimeStart = Number(target["utime_start"]);
                 const utimeEnd = Number(target["utime_end"]);
                 if (utimeStart <= utime && utime <= utimeEnd) {
-                    postDecodeErrorImage(image, date, camera, car);
+                    const scene: string = `${utimeStart}_${utimeEnd}`
+                    postDecodeErrorImage(image, date, scene, camera, car);
                 }
             }
             else { console.error("Unknown error: ", error, decoder, image); }
@@ -160,7 +164,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
             for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
                 const data = dataList[dataIndex];
                 if (data === undefined) { console.error("Error: data is undefined: ", data); }
-                
+
                 // Create new VideoDecoder for new camera
                 const VideoDecoderId = data.camera;
                 if (!(VideoDecoderId in VideoDecoders)) {
@@ -197,7 +201,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
     console.log("All finished!");
 }
 
-const date = "2023_08_02"
+const date = "2023_07_31"
 const targetsJson: Array<any> = require(`./encoded_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
