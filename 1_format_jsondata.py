@@ -1,3 +1,7 @@
+DATE = "2023_08_02"
+
+
+
 import os
 import json
 from tqdm import tqdm
@@ -32,14 +36,18 @@ def test():
 
 
 def main():
-    for root, _, files in os.walk("src/sample_data/_2023_07_31"):
+    for root, _, files in os.walk(f"src/sample_data/_{DATE}"):
         root = root.replace('\\', '/')
-        pbar = tqdm(files)
-        for file in pbar:
-            pbar.set_description(f"{root}/{file}")
-            if "_decoded_video.json" in file:
-                filepath = f"{root}/{file}"
-                repair_jsonfile(filepath)
+        files = list(filter(lambda f: f.endswith("_decoded_video.json"), files))
+        if len(files) == 0:
+            print(f"Directory {root} have no json files.")
+        else:
+            pbar = tqdm(files, desc=root)
+            for file in pbar:
+                pbar.set_description(f"{root}/{file}")
+                if "_decoded_video.json" in file:
+                    filepath = f"{root}/{file}"
+                    repair_jsonfile(filepath)
 
 
 

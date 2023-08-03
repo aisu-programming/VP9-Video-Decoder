@@ -136,7 +136,7 @@ function decodeImage(decoder: VideoDecoder, image: May.image_t, date: string, ca
 }
 
 async function main(date: string, targetsJson: Array<Record<string, any>>) {
-    console.log("Start decoding...");
+    console.log(`Start decoding... Targets total: ${targetsJson.length}`);
 
     for (let targetIndex = 0; targetIndex < targetsJson.length; targetIndex++) {
         const target = targetsJson[targetIndex];
@@ -160,9 +160,9 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
             for (let dataIndex = 0; dataIndex < dataList.length; dataIndex++) {
                 const data = dataList[dataIndex];
                 if (data === undefined) { console.error("Error: data is undefined: ", data); }
+                
+                // Create new VideoDecoder for new camera
                 const VideoDecoderId = data.camera;
-
-                // Create new VideoDecoder for new car-camera
                 if (!(VideoDecoderId in VideoDecoders)) {
                     var newVideoDecoder = createVideoDecoder(date, data.camera, car, target);
                     newVideoDecoder = configureDecoder(newVideoDecoder, {
@@ -197,7 +197,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
     console.log("All finished!");
 }
 
-const date = "2023_07_31"
+const date = "2023_08_02"
 const targetsJson: Array<any> = require(`./sample_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
