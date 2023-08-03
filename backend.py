@@ -65,7 +65,7 @@ def create_black_image():
     return jsonify({"message": "File uploaded successfully"})
 
 
-CACHE_DATA = {}
+# CACHE_DATA = {}
 @app.route("/data", methods=["GET"])
 def get_data():
     date        = request.args.get("date")

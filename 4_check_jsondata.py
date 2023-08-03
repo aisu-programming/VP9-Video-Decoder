@@ -72,6 +72,7 @@ def main():
         static[scene] = dict(sorted(static[scene].items(), key=lambda i: i[0]))
     static = dict(sorted(static.items(), key=lambda i: i[0]))
     print(static)
+    os.makedirs(f"decoded_images/{DATE}", exist_ok=True)
     with open(f"decoded_images/{DATE}/verification.json", 'w') as json_file:
         json.dump(static, json_file, indent=2)
 
