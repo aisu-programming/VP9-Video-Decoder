@@ -29,7 +29,7 @@ Next, to change the groups txt file to JSON format:
 ## Usage
 The main part of the codes are in [src/App.tsx](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/App.tsx).
 
-Simply edit the date at [line 200](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/App.tsx#L200) to the target date.
+Simply edit the date at [line 204](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/App.tsx#L204) to the target date.
 
 Run the Back-End App, then run the Front-End App:
 1. `python backend.py`
@@ -40,7 +40,5 @@ Run the Back-End App, then run the Front-End App:
 To check that the total of decoded files is correct:
 1. Edit the DATE variable to target date in [src/4_check_jsondata.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/4_check_jsondata.py#L1).
 2. Execute it: `python 4_check_jsondata.py`
-3. You should see results like:
-
-   > ![image](https://github.com/aisu-programming/VP9-Video-Decoder/assets/66176726/4921e668-e4ae-4284-a634-c36d5e4ed53c)
-4. Check that the number in the resulting dictionary are same to the total in the output directory - "decoded_images".
+3. It will create a JSON file named "verification.json" in the output directory "decoded_images/{_DATE_}".
+4. Check that the number in the resulting dictionary in "verification.json" are same to the total in the output directory.
