@@ -201,7 +201,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
     console.log("All finished!");
 }
 
-const date = "2023_07_31"
+const date = "2023_08_02"
 const targetsJson: Array<any> = require(`./encoded_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
