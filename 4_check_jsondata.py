@@ -24,9 +24,9 @@ def process_json_file(car, json_filepath, target_list):
             if check(car, data, target_list):
                 cameracar = data["camera"]+'/'+car
                 if cameracar not in return_static.keys():
-                    return_static[cameracar] = 1
+                    return_static[cameracar] = [ data["utime"] ]
                 else:
-                    return_static[cameracar] += 1
+                    return_static[cameracar] += [ data["utime"] ]
     return return_static
 
 def main():
@@ -49,6 +49,9 @@ def main():
                             static[key] = return_static[key]
                         else:
                             static[key] += return_static[key]
+    
+    for key in static.keys():
+        static[key] = len(list(set(static[key])))
     static = dict(sorted(static.items(), key=lambda i: i[0]))
     print(static)
 
