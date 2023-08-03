@@ -8,11 +8,8 @@
 
 Though I have checked but may have dependency issues.
 
-## Run
-`npm start`
-
 ## Preprocess
-Download the zipped data file under [src/encoded_data](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/encoded_data).
+Download the zipped data file under [src/encoded_data](https://github.com/aisu-programming/VP9-Video-Decoder/tree/master/src/encoded_data).
 
 Unzip the file and add an underscore (_) before the directory and the groups txt file.
 
@@ -21,12 +18,12 @@ Your files should look like this:
 > ![image](https://github.com/aisu-programming/VP9-Video-Decoder/assets/66176726/2d705469-7d9e-4756-9d37-9c9f77b767ea)
 
 If the JSON files are not well formatted:
-1. Edit the DATE variable to target date in [src/1_format_jsondata.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/1_format_jsondata.py)
+1. Edit the DATE variable to target date in [src/1_format_jsondata.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/1_format_jsondata.py)
 2. Execute it: `python 1_format_jsondata.py`
 
 Next, to change the groups txt file to JSON format:
-1. Edit the DATE variable to target date in [src/2_convert_groups_txt.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/2_convert_groups_txt.py)
-2. Edit the import source and the DATE variable to target date in [src/3_extract_groups_py.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/3_extract_groups_py.py)
+1. Edit the DATE variable to target date in [src/2_convert_groups_txt.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/2_convert_groups_txt.py)
+2. Edit the import source and the DATE variable to target date in [src/3_extract_groups_py.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/3_extract_groups_py.py)
 3. Execute them: `python 2_convert_groups_txt.py` `python 3_extract_groups_py.py`
 
 ## Usage
