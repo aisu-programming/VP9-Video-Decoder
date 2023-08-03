@@ -8,83 +8,39 @@
 
 Though I have checked but may have dependency issues.
 
-## Run
-`npm start`
+## Preprocess
+Download the zipped data file under [src/encoded_data](https://github.com/aisu-programming/VP9-Video-Decoder/tree/master/src/encoded_data).
+
+Unzip the file and add an underscore (_) before the directory and the groups txt file.
+
+Your files should look like this:
+> ![image](https://github.com/aisu-programming/VP9-Video-Decoder/assets/66176726/abcabbe9-7e91-431c-b9f1-391166a4470c)
+> ![image](https://github.com/aisu-programming/VP9-Video-Decoder/assets/66176726/2d705469-7d9e-4756-9d37-9c9f77b767ea)
+
+If the JSON files are not well formatted:
+1. Edit the DATE variable to target date in [src/1_format_jsondata.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/1_format_jsondata.py#L1)
+2. Execute it: `python 1_format_jsondata.py`
+
+Next, to change the groups txt file to JSON format:
+1. Edit the DATE variable to target date in [src/2_convert_groups_txt.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/2_convert_groups_txt.py#L1)
+2. Edit the import source and the DATE variable to target date in [src/3_extract_groups_py.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/3_extract_groups_py.py#L1:L2)
+3. Execute them: `python 2_convert_groups_txt.py` `python 3_extract_groups_py.py`
 
 ## Usage
-Put the JSON data file under [src](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src).
+The main part of the codes are in [src/App.tsx](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/App.tsx).
 
-The main part of the codes are in [src/App.tsx (7:126)](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L7-L58).
+Simply edit the date at [line 200](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/src/App.tsx#L200) to the target date.
 
-Simply edit codes in [line 128:140](https://github.com/aisu-programming/VP9-Video-Decoder/blob/46c314243dbb4343ef83933f277e6c33b6df0ae6/src/App.tsx#L60-L66) to change the input JSON data file paths and the utime limitation.
+Run the Back-End App, then run the Front-End App:
+1. `python backend.py`
+2. `npm start`
+3. You should see logs in both the console of the browser and the Back-End App.
 
-<!-- # Getting Started with Create React App
+## Verification
+To check that the total of decoded files is correct:
+1. Edit the DATE variable to target date in [src/4_check_jsondata.py](https://github.com/aisu-programming/VP9-Video-Decoder/blob/master/4_check_jsondata.py#L1)
+2. Execute it: `python 4_check_jsondata.py`
+3. You should see results like:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify) -->
+   > ![image](https://github.com/aisu-programming/VP9-Video-Decoder/assets/66176726/4921e668-e4ae-4284-a634-c36d5e4ed53c)
+4. Check that the number in the resulting dictionary are same to the total in the output directory - "decoded_images".
