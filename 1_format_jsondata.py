@@ -36,7 +36,7 @@ def test():
 
 
 def main():
-    for root, _, files in os.walk(f"src/sample_data/_{DATE}"):
+    for root, _, files in os.walk(f"src/encoded_data/_{DATE}"):
         root = root.replace('\\', '/')
         files = list(filter(lambda f: f.endswith("_decoded_video.json"), files))
         if len(files) == 0:

@@ -1,4 +1,4 @@
-from src.sample_data._2023_08_02._2023_08_02_groups import utime_interval_list
+from src.encoded_data._2023_08_02._2023_08_02_groups import utime_interval_list
 DATE = "_2023_08_02"
 
 
@@ -12,5 +12,5 @@ for item in utime_interval_list:
         "utime_end"  : item[0][1],
         "cars"       : item[-1],
     })
-with open(f"src/sample_data/{DATE}/{DATE}_groups.json", 'w') as json_file:
+with open(f"src/encoded_data/{DATE}/{DATE}_groups.json", 'w') as json_file:
     json.dump(json_list, json_file, indent=4)

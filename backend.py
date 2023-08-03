@@ -98,7 +98,7 @@ def get_data():
         reference_data, response_data = [], []
 
         # if f"{car}" not in CACHE_DATA.keys():
-        directory = f"src/sample_data/_{date}/{car}"
+        directory = f"src/encoded_data/_{date}/{car}"
         json_files = list(os.listdir(directory))
         
         pbar = tqdm(json_files, desc="Loading data")

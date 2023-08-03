@@ -198,7 +198,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
 }
 
 const date = "2023_08_02"
-const targetsJson: Array<any> = require(`./sample_data/_${date}/_${date}_groups.json`);
+const targetsJson: Array<any> = require(`./encoded_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
 

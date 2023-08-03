@@ -30,12 +30,12 @@ def process_json_file(car, json_filepath, target_list):
     return return_static
 
 def main():
-    target_file = f"src/sample_data/_{DATE}/_{DATE}_groups.json"
+    target_file = f"src/encoded_data/_{DATE}/_{DATE}_groups.json"
     with open(target_file, "r") as file:
         target_list = json.load(file)
 
     static = {}
-    root_directory = f"src/sample_data/_{DATE}"
+    root_directory = f"src/encoded_data/_{DATE}"
     for root, _, files in os.walk(root_directory):
         files = list(filter(lambda f: f.endswith("_decoded_video.json"), files))
         if len(files) > 0:
