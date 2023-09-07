@@ -1,4 +1,4 @@
-DATE = "2023_08_02"
+DATE = "2023_08_17"
 
 
 
@@ -44,7 +44,8 @@ def main():
         else:
             pbar = tqdm(files, desc=root)
             for file in pbar:
-                pbar.set_description(f"{root}/{file}")
+                # pbar.set_description(f"{root}/{file}")
+                pbar.set_description(f"Directory {root}")
                 if "_decoded_video.json" in file:
                     filepath = f"{root}/{file}"
                     repair_jsonfile(filepath)

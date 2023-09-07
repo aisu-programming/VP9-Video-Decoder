@@ -144,7 +144,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
 
     for (let targetIndex = 0; targetIndex < targetsJson.length; targetIndex++) {
         const target = targetsJson[targetIndex];
-        console.log(`Decoding targetsJson[${targetIndex}]: `, target);
+        console.log(`Decoding targetsJson: ${targetIndex+1}/${targetsJson.length}`, target);
 
         for (const car of target["cars"]) {
             // 定義要傳遞的參數
@@ -201,7 +201,7 @@ async function main(date: string, targetsJson: Array<Record<string, any>>) {
     console.log("All finished!");
 }
 
-const date = "2023_08_02"
+const date = "2023_08_17"
 const targetsJson: Array<any> = require(`./encoded_data/_${date}/_${date}_groups.json`);
 main(date, targetsJson);
 
