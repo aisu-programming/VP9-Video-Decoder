@@ -1,5 +1,5 @@
-from src.encoded_data._2023_08_17._2023_08_17_groups import utime_interval_list
-DATE = "_2023_08_17"
+from src.encoded_data._2023_09_22._2023_09_22_groups import utime_interval_list
+DATE = "_2023_09_22"
 
 
 
@@ -8,8 +8,8 @@ import json
 json_list = []
 for item in utime_interval_list:
     json_list.append({
-        "utime_start": item[0][0] + "000000",
-        "utime_end"  : item[0][1] + "000000",
+        "utime_start": item[0][0],
+        "utime_end"  : item[0][1],
         "cars"       : item[-1],
     })
 with open(f"src/encoded_data/{DATE}/{DATE}_groups.json", 'w') as json_file:

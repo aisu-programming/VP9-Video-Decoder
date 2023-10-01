@@ -13,6 +13,9 @@ CORS(app)
 SAVE_FOLDER_LIST = []
 
 
+
+#-------------------- Common    API --------------------#
+
 def save_image_from_base64(base64_image, filepath):
     # 移除 base64 字串前的標頭，例如 "data:image/jpeg;base64,"
     image_data = base64_image.split(',')[1]
@@ -22,48 +25,6 @@ def save_image_from_base64(base64_image, filepath):
     with open(filepath, "wb") as f:
         f.write(binary_data)
     return
-
-
-@app.route("/upload/success", methods=["POST"])
-def upload_successfully_decoded_image():
-    data = request.get_json()
-    base64_image = data["image"]
-    date         = data["date"]
-    scene        = data["scene"]
-    camera       = data["camera"]
-    car          = data["car"]
-    utime        = data["utime"]
-    
-    save_dir = f"{date}/{scene}/{camera}/{car}"
-    if save_dir not in SAVE_FOLDER_LIST:
-        os.makedirs(f"decoded_images/{save_dir}", exist_ok=True)
-        SAVE_FOLDER_LIST.append(save_dir)
-    filename = str(utime) + ".jpg"
-    save_path = f"decoded_images/{save_dir}/{filename}"
-    save_image_from_base64(base64_image, save_path)
-    return jsonify({"message": "File uploaded successfully"})
-
-
-@app.route("/upload/failed", methods=["POST"])
-def create_black_image():
-    data = request.get_json()
-    date   = data["date"]
-    scene  = data["scene"]
-    camera = data["camera"]
-    car    = data["car"]
-    utime  = data["utime"]
-    width  = data["width"]
-    height = data["height"]
-    
-    save_dir = f"{date}/{scene}/{camera}/{car}"
-    if save_dir not in SAVE_FOLDER_LIST:
-        os.makedirs(f"decoded_images/{save_dir}", exist_ok=True)
-        SAVE_FOLDER_LIST.append(save_dir)
-    filename = str(utime) + ".jpg"
-    save_path = f"decoded_images/{save_dir}/{filename}"
-    cv2.imwrite(save_path, np.zeros((height, width, 1), dtype=np.uint8))
-    return jsonify({"message": "File uploaded successfully"})
-
 
 # CACHE_DATA = {}
 @app.route("/data", methods=["GET"])
@@ -125,6 +86,105 @@ def get_data():
         data = { "error": "Parameter loss: " + ", ".join(loss_parameters) }
     return jsonify(data)
 
+#-------------------- Common    API --------------------#
+
+
+
+#-------------------- Group     API --------------------#
+
+@app.route("/group/upload/success", methods=["POST"])
+def group_upload_successfully_decoded_image():
+    data = request.get_json()
+    base64_image = data["image"]
+    date         = data["date"]
+    scene        = data["scene"]
+    camera       = data["camera"]
+    car          = data["car"]
+    utime        = data["utime"]
+    
+    save_dir = f"{date}/{scene}/{camera}/{car}"
+    if save_dir not in SAVE_FOLDER_LIST:
+        os.makedirs(f"decoded_images/group/{save_dir}", exist_ok=True)
+        SAVE_FOLDER_LIST.append(save_dir)
+    filename = str(utime) + ".jpg"
+    save_path = f"decoded_images/group/{save_dir}/{filename}"
+    save_image_from_base64(base64_image, save_path)
+    return jsonify({"message": "File uploaded successfully"})
+
+
+@app.route("/group/upload/failed", methods=["POST"])
+def group_create_black_image():
+    data = request.get_json()
+    date   = data["date"]
+    scene  = data["scene"]
+    camera = data["camera"]
+    car    = data["car"]
+    utime  = data["utime"]
+    width  = data["width"]
+    height = data["height"]
+    
+    save_dir = f"{date}/{scene}/{camera}/{car}"
+    if save_dir not in SAVE_FOLDER_LIST:
+        os.makedirs(f"decoded_images/group/{save_dir}", exist_ok=True)
+        SAVE_FOLDER_LIST.append(save_dir)
+    filename = str(utime) + ".jpg"
+    save_path = f"decoded_images/group/{save_dir}/{filename}"
+    cv2.imwrite(save_path, np.zeros((height, width, 1), dtype=np.uint8))
+    return jsonify({"message": "File uploaded successfully"})
+
+#-------------------- Group     API --------------------#
+
+
+
+#-------------------- Traversal API --------------------#
+
+@app.route("/traversal/upload/success", methods=["POST"])
+def traversal_upload_successfully_decoded_image():
+    data            = request.get_json()
+    base64_image    = data["image"]
+    date            = data["date"]
+    intersection_id = data["intersectionId"]
+    car             = data["car"]
+    scene_count     = data["sceneCount"]
+    camera          = data["camera"]
+    utime           = data["utime"]
+    
+    save_dir = f"{date}/intersection_{intersection_id}/scene_{scene_count}_{car}/{camera}"
+    if save_dir not in SAVE_FOLDER_LIST:
+        os.makedirs(f"decoded_images/traversal/{save_dir}", exist_ok=True)
+        SAVE_FOLDER_LIST.append(save_dir)
+    filename = str(utime) + ".jpg"
+    save_path = f"decoded_images/traversal/{save_dir}/{filename}"
+    save_image_from_base64(base64_image, save_path)
+    return jsonify({"message": "File uploaded successfully"})
+
+
+@app.route("/traversal/upload/failed", methods=["POST"])
+def traversal_create_black_image():
+    data            = request.get_json()
+    date            = data["date"]
+    intersection_id = data["intersectionId"]
+    car             = data["car"]
+    scene_count     = data["sceneCount"]
+    camera          = data["camera"]
+    utime           = data["utime"]
+    width           = data["width"]
+    height          = data["height"]
+    
+    save_dir = f"{date}/intersection_{intersection_id}/scene_{scene_count}_{car}/{camera}"
+    if save_dir not in SAVE_FOLDER_LIST:
+        os.makedirs(f"decoded_images/traversal/{save_dir}", exist_ok=True)
+        SAVE_FOLDER_LIST.append(save_dir)
+    filename = str(utime) + ".jpg"
+    save_path = f"decoded_images/traversal/{save_dir}/{filename}"
+    cv2.imwrite(save_path, np.zeros((height, width, 1), dtype=np.uint8))
+    return jsonify({"message": "File uploaded successfully"})
+
+#-------------------- Traversal API --------------------#
+
+
+
+#-------------------- Execution ------------------------#
 
 if __name__ == "__main__":
     app.run(debug=True)
